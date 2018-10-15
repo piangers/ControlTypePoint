@@ -20,27 +20,33 @@ class ControlPoint:
         settings = QSettings()
         self.tAction = QAction(QIcon(":/plugins/ControlPoint/tr.png"), u'Trim', self.iface.mainWindow())
         self.tAction.setCheckable(True)
+        self.spinBox = QDoubleSpinBox(self.iface.mainWindow())
         self.toolbar = self.iface.addToolBar(u'Trim tools')
         
         # 2 - CONECTAR O CLIQUE DO BOTÃO COM UM MÉTODO ("SLOT")
-        self.tAction.toggled.connect(self.run)  
+        self.tAction.toggled.connect(self.run)
+        self.spinBox.valueChanged.connect(self.setTolerancia)
        
-        #Padrões fixados  
-        self.toolbar.addAction(self.tAction)
-
-        # cria o objeto combobox:
-        self.comboBox = QComboBox() 
+        #Padrões fixados
         
-    
+        self.spinBox.setDecimals(1)
+        self.spinBox.setMinimum(0.000)
+        self.spinBox.setMaximum(5000.000)
+        self.spinBox.setSingleStep(0.100)
+        self.tolerancia = self.spinBox.value()
+        self.spinBox.setToolTip("Escala de avaliacao")
+        self.toolbar.addAction(self.tAction)
+        self.combobox = QComboBox() # cria o objeto combobox:
+
     def unload(self):
         del self.toolbar
         
+    def setTolerancia(self, t):
+        self.tolerancia = t # recebendo tolerância atravéz de t.
 
     def run(self):
         """Run method that performs all the real work"""
        
-        
-
         # Obter todas as camadas carregadas na interface
         layers = self.iface.legendInterface().layers()
         self.layers = [layer for layer in self.iface.legendInterface().layers() if layer.type() == QgsMapLayer.VectorLayer]

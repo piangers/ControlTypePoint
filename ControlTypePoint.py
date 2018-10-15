@@ -20,81 +20,136 @@ class ControlPoint:
         settings = QSettings()
         self.tAction = QAction(QIcon(":/plugins/ControlPoint/tr.png"), u'Trim', self.iface.mainWindow())
         self.tAction.setCheckable(True)
-        self.spinBox = QDoubleSpinBox(self.iface.mainWindow())
         self.toolbar = self.iface.addToolBar(u'Trim tools')
+
+        self.wcb = QgsMapLayerComboBox(self.dlg)
+        self.wcb.setFixedWidth(220)
+        self.wcb.move(140,40)
+        self.wcb.setFilters( QgsMapLayerProxyModel.RasterLayer )
         
         # 2 - CONECTAR O CLIQUE DO BOTÃO COM UM MÉTODO ("SLOT")
-        self.tAction.toggled.connect(self.run)
-        self.spinBox.valueChanged.connect(self.setTolerancia)
+        self.tAction.toggled.connect(self.run)  
        
-        #Padrões fixados
-        
-        self.spinBox.setDecimals(1)
-        self.spinBox.setMinimum(0.000)
-        self.spinBox.setMaximum(5000.000)
-        self.spinBox.setSingleStep(0.100)
-        self.tolerancia = self.spinBox.value()
-        self.spinBox.setToolTip("Escala de avaliacao")
+        #Padrões fixados  
         self.toolbar.addAction(self.tAction)
-        # self.combobox = QComboBox() # cria o objeto combobox:
+
+        # cria o objeto combobox:
+        self.comboBox = QComboBox() 
 
     def unload(self):
         del self.toolbar
-        
-    def setTolerancia(self, t):
-        self.tolerancia = t # recebendo tolerância atravéz de t.
+
 
     def run(self):
-        """Run method that performs all the real work"""
-        # show the dialog
-        self.dlg.show()
+    """Run method that performs all the real work"""
+    #My code starts here
+    layer = self.wcb.currentLayer()
+.
+.
+.
+    self.dlg.show()
+    # Run the dialog event loop
+    result = self.dlg.exec_()
+    # See if OK was pressed
+    if result:
+        # Do something useful here - delete the line containing pass and
+        # substitute with your code.
+        #My code starts here
+        message = "the raster average of " + filename + " is = " + str(average) 
+        QMessageBox.information(None, "Raster Average", message)
+        #My code ends here
 
-        # Get all loaded layers in the interface
-        #layers = self.iface.legendInterface().layers()
-        layers = [layer for layer in self.iface.legendInterface().layers() if layer.type() == QgsMapLayer.VectorLayer]
-        # Create an empty list which we can populate
-        layer_list = []
-        # For every item (which we call "layer") in all loaded layers
-        for layer in layers:
-            # Add it to the list
-            layer_list.append(layer.name())
-        # Clear comboBox (useful so we don't create duplicate items in list)
-        self.dlg.comboBox.clear()
-        # Add all items in list to comboBox
-        self.dlg.comboBox.addItems(layer_list)
-        # Clear comboBox_2
-        self.dlg.comboBox_2.clear()
-        # Add all items in list to comboBox_2
-        self.dlg.comboBox_2.addItems(layer_list)
 
-    def layer_field():
-        # Identify selected layer by its index
-        selectedLayerIndex = self.dlg.comboBox.currentIndex()
-        selectedLayer = layers[selectedLayerIndex]
-        # Identify fields of the selected layer
-        fields = selectedLayer.pendingFields()
-        # Get field names of the fields
-        fieldnames = [field.name() for field in fields]
-        # Clear comboBox_5
-        self.dlg.comboBox_5.clear()
-        # Add field names to comboBox_5
-        self.dlg.comboBox_5.addItems(fieldnames)
 
-    def table_field():
-        # Same comments as above
-        selectedLayerIndex = self.dlg.comboBox_2.currentIndex()
-        selectedLayer = layers[selectedLayerIndex]
-        fields = selectedLayer.pendingFields()
-        fieldnames = [field.name() for field in fields]
-        self.dlg.comboBox_3.clear()            
-        self.dlg.comboBox_3.addItems(fieldnames)
-        self.dlg.comboBox_4.clear()
-        self.dlg.comboBox_4.addItems(fieldnames)
+    
 
-    # When changing layer in comboBox, run the function "layer_field()"
-    # to refresh the field names in the associated comboBoxes
-    self.dlg.comboBox.currentIndexChanged.connect(layer_field)
-    self.dlg.comboBox_2.currentIndexChanged.connect(table_field)
 
-    # Para escolher uma camada: QgsMapLayerComboBox
-    # Para escolher um campo em uma camada: QgsFieldComboBox
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+    # def run(self):
+    #     """Run method that performs all the real work"""
+       
+    #     self.comboBox.show()  # mostra o diálogo
+
+    #     # Obter todas as camadas carregadas na interface
+    #     layers = self.iface.legendInterface().layers()
+    #     self.layers = [layer for layer in self.iface.legendInterface().layers() if layer.type() == QgsMapLayer.VectorLayer]
+        
+    #     # Cria uma lista vazia que possamos preencher
+    #     layer_list = []
+        
+    #     # Para cada item (que chamamos de "camada") em todas as camadas carregadas
+    #     for layer in layers:
+    #         # Adicione-o à lista
+    #         layer_list.append(layer.name())
+
+    #     # Clear comboBox (útil para não criar itens duplicados na lista)
+    #     self.comboBox.clear()
+   
+    #     # Adicione todos os itens na lista ao comboBox
+    #     self.comboBox.addItems()
+        
+    # def layer_field():
+
+    #     # Identifique a camada selecionada pelo seu índice
+    #     selectedLayerIndex = self.dlg.comboBox.currentIndex()
+    #     selectedLayer = self.layers[selectedLayerIndex]
+
+    #     # Identifique os campos da camada selecionada
+    #     fields = selectedLayer.pendingFields()
+
+    #     # Obter nomes de campos dos campos
+    #     fieldnames = [field.name() for field in fields]
+
+    #     # Clear comboBox_5
+    #     self.dlg.comboBox_5.clear()
+
+    #     # Adicione nomes de campos ao comboBox_5
+    #     self.dlg.comboBox_5.addItems()
+
+    #     # Mesmos comentários como acima
+    #     selectedLayerIndex = self.dlg.comboBox_2.currentIndex()
+    #     selectedLayer = self.layers[selectedLayerIndex]
+    #     fields = selectedLayer.pendingFields()
+    #     fieldnames = [field.name() for field in fields]
+    #     self.dlg.comboBox_3.clear()            
+    #     self.dlg.comboBox_3.addItems(fieldnames)
+    #     self.dlg.comboBox_4.clear()
+    #     self.dlg.comboBox_4.addItems(fieldnames)
+
+    # # Ao alterar a camada no comboBox, execute a função "layer_field ()"
+    # # para atualizar os nomes dos campos nas comboBoxes associadas
+    # self.dlg.comboBox.currentIndexChanged.connect()
+    
+
+    # # Para escolher uma camada: QgsMapLayerComboBox
+    # # Para escolher um campo em uma camada: QgsFieldComboBox

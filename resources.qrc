@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/plugins/ControlTypePoint" >
         <file>tr.png</file>
-	<file>ex.png</file>
     </qresource>
 </RCC>

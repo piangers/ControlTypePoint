@@ -6,7 +6,9 @@ from PyQt4.QtGui import *
 from selectiontool import SelectionTool
 import resources_rc
 import math
-
+import sys
+import os
+from PyQt4 import uic
 
 #Carrega o arquivo da interface .ui
 sys.path.append(os.path.dirname(__file__))
@@ -56,7 +58,7 @@ class ControlTypePoint( GUI ):
         """Run method that performs all the real work"""
 
         # cria o objeto combobox:
-        self.dlg.comboBox = QComboBox() 
+        #self.dlg.comboBox = QComboBox() 
         
         # Obter todas as camadas carregadas na interface
         layers = self.iface.legendInterface().layers()

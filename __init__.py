@@ -6,5 +6,5 @@
 def classFactory(iface):  # pylint: disable=invalid-name
    
     #
-    from trim import Trim
-    return Trim(iface)
+    from ControlTypePoint import ControlTypePoint
+    return ControlTypePoint(iface)

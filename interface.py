@@ -4,6 +4,7 @@ from qgis.gui import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from dlg import Ui_Dialog as GUI
+import math
 
 class Interface(QDialog, GUI):
 
@@ -14,7 +15,7 @@ class Interface(QDialog, GUI):
         self.initSignals()
 
     def initSignals(self):
-    #     self.enter.accepted.connect(self.executar)
+    #  self.enter.accepted.connect(self.executar)
         pass
     
     def accept(self):
@@ -26,7 +27,7 @@ class Interface(QDialog, GUI):
         
         elif not self.xy.isChecked() and not self.z.isChecked():
             print 'Parametros de avaliacao nao selecionados.'
-
+     
         else:
             self.run()
             super(Interface, self).accept()
@@ -35,95 +36,53 @@ class Interface(QDialog, GUI):
         print 'Codigo entra aqui'
         # Converter escala textual para numérica (denominador)
         escala = self.escalaAvaliacao.currentText() # '1:100.000'
-        escalaNum = escala.split(':')[1].replace('.','')
-        escalaNum = int(escalaNum)
-
+        escalaAval = escala.split(':')[1].replace('.','')
+        escalaAval = int(escalaAval)
+        canvas = self.iface.mapCanvas()
+        scala = canvas.scale()
+        escalaAtual = scala.split('.')[0]
         # Recuperar layer selecionado nas combos
         layerReferencia = self.referenciaComboBox.currentLayer()
         layerAvaliacao  = self.avaliacaoComboBox.currentLayer()
-    
-    # def run(self):
-
-    #     """Run method that performs all the real work"""
-
-    #     # exibe o diálogo
-    #     self.dlg.show()
-
-    #     # cria o objeto combobox:
-    #     #self.dlg.comboBox = QComboBox() 
+        novaEscala = escalaAtual + escalaAval - escalaAtual
         
-    #     # Obter todas as camadas carregadas na interface
-    #     layers = self.iface.legendInterface().layers()
-    #     self.layers = [layer for layer in self.iface.legendInterface().layers() if layer.type() == QgsMapLayer.VectorLayer]
+        if escalaAval == escalaAtual:
+            pass
+        else:      
+            canvas.zoomScale(novaEscala)
+            canvas.refresh()
+
+    def distance (self, point1, point2): 
+
+        layerReferencia = self.referenciaComboBox.currentLayer()
+        layerAvaliacao  = self.avaliacaoComboBox.currentLayer()
+
+        for feat in layerReferencia():
+            attrs = feat.attributes()
+            geom = feat.geometry()
+            coords = geom.asPoint()
+            new_coords = (QgsPoint(coords[1], coords[0]))
+            geom = QgsGeometry.fromPoint(new_coords)
         
-    #     # Cria uma lista vazia que possamos preencher
-    #     layer_list = []
         
-    #     # Para cada item (que chamamos de "camada") em todas as camadas carregadas
-    #     for layer in layers:
-    #         # Adicione-o à lista
-    #         layer_list.append(layer.name())
+        #Create a measure object
 
-    #     ''' CAMADA DE REFERÊNCIA '''   
-
-    #     # Clear comboBox ( útil para não criar itens duplicados na lista )
-    #     self.dlg.comboBox.clear()
-    #     # Adicione todos os itens na lista ao comboBox por nome
-    #     self.dlg.comboBox.addItems(layer_list)
-        
-    #     ''' CAMADA DE AVALIAÇÃO '''
-
-    #     # Clear comboBox_2 ( útil para não criar itens duplicados na lista )
-    #     self.dlg.comboBox_2.clear()
-    #     # Adicione nomes de campos ao comboBox_2
-    #     self.dlg.comboBox_2.addItems(layer_list)
-
-    #     ''' ESCALA DE AVALIAÇÃO '''
-
-    #     # Clear comboBox_3 ( útil para não criar itens duplicados na lista )
-    #     self.dlg.comboBox_3.clear() 
-    #     # Adicione nomes de campos ao comboBox_3          
-    #     self.dlg.comboBox_3.addItems("1:250.000","1:100.000","1:50.000","1:25.000","1:10.000","1:2.000","1:1000")
-        
-    #     ''' CHECKBOX '''
-
-    #     # CheckBox de X/Y
-    #     if self.dlg.checkBoxXY.isChecked():
-    #         doSomething()
-    #     else:
-    #         doSomethingElse()
-        
-    #     # CheckBox de Z
-    #     if self.dlg.checkBoxZ.isChecked():
-    #         doSomething()
-    #     else:
-    #         doSomethingElse()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    # # Ao alterar a camada no comboBox, execute a função "layer_field ()"
-    # # para atualizar os nomes dos campos nas comboBoxes associadas
-    
-
-    # # Para escolher uma camada: QgsMapLayerComboBox
-    # # Para escolher um campo em uma camada: QgsFieldComboBox
+        distance = QgsDistanceArea()
+        crs = QgsCoordinateReferenceSystem()
+        crs.createFromSrsId(3452) # EPSG:4326
+        distance.setSourceCrs(crs)
+        distance.setEllipsoidalMode(True)
+        distance.setEllipsoid('WGS84')
+        m = distance.measureLine(point1, point2)
+        return math.sqrt (point1.sqrDist (point2)) 
 
 
-    # # # Identifique a camada selecionada pelo seu índice
-    # # selectedLayerIndex = self.dlg.comboBox.currentIndex()
-    # # selectedLayer = self.layers[selectedLayerIndex]
 
-    # # # Identifique os campos da camada selecionada
-    # # fields = selectedLayer.pendingFields()
 
-    # # Obter nomes de campos dos campos
-    # # fieldnames = [field.name() for field in fields]
+
+
+            # dpi=self.iface.mainWindow().physicalDpiX()
+            # maxScalePerPixel = 156543.04
+            # inchesPerMeter = 39.37
+            # zoomlevel = int(round(math.log( ((dpi* inchesPerMeter * maxScalePerPixel) / escalaAtual), 2 ), 0))
+            # print zoomlevel

@@ -12,10 +12,6 @@ from PyQt4 import uic
 
 from interface import Interface
 
-#Carrega o arquivo da interface .ui
-#sys.path.append(os.path.dirname(__file__))
-#GUI,_= uic.loadUiType (os.path.join(os.path.dirname(__file__),'ui','dlg.ui'),resource_suffix='')
-
 class ControlTypePoint:
 
     def __init__(self, iface):
@@ -44,6 +40,5 @@ class ControlTypePoint:
     def openWindow(self):
         self.dlg.show()
 
-
-##################################################################################################################################
-##################################################################################################################################
+# terminal troca 1 e 2;
+# sudo nano /usr/lib/python2.7/dist-packages/qgis/PyQt/QtCore.py

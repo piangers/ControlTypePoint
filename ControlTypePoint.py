@@ -29,6 +29,7 @@ class ControlTypePoint:
         
         # 2 - CONECTAR O CLIQUE DO BOTÃO COM UM MÉTODO ("SLOT")
         self.tAction.triggered.connect(self.openWindow)
+        
        
         #Padrões fixados
         

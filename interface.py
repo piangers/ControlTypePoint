@@ -5,6 +5,9 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from dlg import Ui_Dialog as GUI
 import math
+from math import sqrt
+import itertools
+
 
 class Interface(QDialog, GUI):
 
@@ -12,11 +15,13 @@ class Interface(QDialog, GUI):
         super(Interface, self).__init__()
         self.setupUi(self)
 
+        self.spinBox.setMaximum(99999999)
+        self.spinBox.setMinimum(0)
+
         self.initSignals()
 
     def initSignals(self):
-    #  self.enter.accepted.connect(self.executar)
-        pass
+        self.enter.accepted.connect(self.accept)
     
     def accept(self):
         if self.referenciaComboBox.currentLayer() is None:
@@ -33,160 +38,82 @@ class Interface(QDialog, GUI):
             super(Interface, self).accept()
 
     def run(self):
-        
-        print 'Codigo entra aqui'
+
         # Converter escala textual para numérica (denominador)
-        escala = self.escalaAvaliacao.currentText() # '1:100.000'
-        escalaAval = escala.split(':')[1].replace('.','')
-        escalaAval = int(escalaAval)
-        canvas = self.iface.mapCanvas()
-        scala = canvas.scale()
-        escalaAtual = scala.split('.')[0]
-        # Recuperar layer selecionado nas combos
-        layerRef = self.referenciaComboBox.currentLayer()
-        layerAval = self.avaliacaoComboBox.currentLayer()
-        novaEscala = escalaAtual + escalaAval - escalaAtual
-        
-        if signal:
+        # escala = self.escalaAvaliacao.currentText() # '1:100.000'
+        # escalaAval = escala.split(':')[1].replace('.','')
+        # escalaAval = int(escalaAval)
 
-            listaLr = []
-            listaLa = []
+        raio = self.spinBox.value()
+        layer1 = self.referenciaComboBox.currentLayer()
+        layer2 = self.avaliacaoComboBox.currentLayer()
 
-            for lr in layerRef.getFeatures():
-                # coordenada xy de layer de referência
-                lr.geometry().asPoint()
-                # coordenada Z de layerReferência
-                geometryV2 = l.geometry().geometry()
-                geometryV2.z()
+        XY = False
+        Z = False
+
+        if self.xy.isChecked():
+            XY = True
+        if self.z.isChecked():
+            Z = True
+
+        source1 = layer1.crs()
+        source2 = layer2.crs()
+        dest = QgsCoordinateReferenceSystem(3857)
+
+        tr1 = QgsCoordinateTransform(source1, dest)
+        tr2 = QgsCoordinateTransform(source2, dest)
+
+        lista1 = []
+        lista2 = []
+
+        for f1 in layer1.getFeatures():
+            lista1.append(f1)
+        for f2 in layer2.getFeatures():
+            lista2.append(f2)
+            
+        listaNotFound = []
+        listaHomologosXY = {}
+        listaHomologosZ = {}
+            
+        for f1 in lista1:
+            geom1 = QgsGeometry(f1.geometry())
+            geom1.transform(tr1)
+            found = False
+            raioTeste = raio
+            maisPerto = None
                 
-            for la in layerAval.getFeatures():
-                # coordenada xy de layer de avaliação
-                la.geometry().asPoint()
-                # coordenada Z de layer de avaliação
-                geometryV2 = l.geometry().geometry()
-                geometryV2.z()
+            for f2 in lista2:
+                geom2 = QgsGeometry(f2.geometry())
+                geom2.transform(tr2)
+                if geom1.buffer(raioTeste,20).contains(geom2):
+                    raioTeste = sqrt(geom1.asPoint().sqrDist(geom2.asPoint()))
+                    maisPerto = f2
+                    found = True
+                    
+            if found == False:
+                listaNotFound.append(int(f1.id()))
+            
+            else:
+                if XY:
+                    listaHomologosXY[int(f1.id()), int(maisPerto.id())] = (raioTeste)
+                if Z:
+                    listaHomologosZ[int(f1.id()), int(maisPerto.id())]  = f1.geometry().geometry().z() - maisPerto.geometry().geometry().z()
+                lista2.remove(maisPerto)
 
+        print 'Id\'s nao encontrados: ', listaNotFound
+        if XY or Z:
+            print 'Homologos: ', listaHomologosXY.keys()
 
+        if XY:
+            distAcum = 0
+            for valorXY in listaHomologosXY.values():
+                distAcum += valorXY
 
+            print 'Distancia media: ', distAcum / len(listaHomologosXY)
 
+        if Z:
+            zAcum = 0
+            for valorZ in listaHomologosZ.values():
+                zAcum += valorZ
 
-
-
-
-
-
-
-
-
-
-
-        if escalaAval == escalaAtual:
-            pass
-        else:      
-            canvas.zoomScale(novaEscala)
-            canvas.refresh()
-
-    def distance (self, point1, point2): 
-
-        layerReferencia = self.referenciaComboBox.currentLayer()
-        layerAvaliacao  = self.avaliacaoComboBox.currentLayer()
-
-        for feat in layerReferencia():pointFather
-            attrs = feat.attributes()
-            geom = feat.geometry()
-            coords = geom.asPoint()
-            new_coords = (QgsPoint(coords[1], coords[0]))
-            geom = QgsGeometry.fromPoint(new_coords)
-        
-        
-
-        #Create a measure object
-
-        distance = QgsDistanceArea()
-        crs = QgsCoordinateReferenceSystem()
-        crs.createFromSrsId(3452) # EPSG:4326
-        distance.setSourceCrs(crs)
-        distance.setEllipsoidalMode(True)
-        distance.setEllipsoid('WGS84')
-        m = distance.measureLine(point1, point2)
-        return math.sqrt (point1.sqrDist (point2)) 
-
-
-
-
-
-
-            # dpi=self.iface.mainWindow().physicalDpiX()
-            # maxScalePerPixel = 156543.04
-            # inchesPerMeter = 39.37
-            # zoomlevel = int(round(math.log( ((dpi* inchesPerMeter * maxScalePerPixel) / escalaAtual), 2 ), 0))
-            # print zoomlevel
-
-import random
-def generate_wind_turbines(spacing):
-    layer = self.iface.activeLayer()
-    crs = layer.crs()
-    
-    point_density = 0.0001
-    fid = 1
-    distance_area = QgsDistanceArea()
-    # List of features
-    fts = []
-    # Create points
-    points = dict() # changed from me 
-    index = QgsSpatialIndex()# changend from me 
-    nPoints = 0 # changed in the edit 
-    pointCount = 0 # changed in the edit 
-
-    for f in layer.getFeatures():
-        fGeom = QgsGeometry(f.geometry())
-        bbox = fGeom.boundingBox()
-        # changed here as well 
-        pointCount = int(round(point_density * distance_area.measure(fGeom))) + int(pointCount)
-        fid += 1
-        nIterations = 0
-        maxIterations = pointCount * 200
-        random.seed()
-        while nIterations < maxIterations and nPoints < pointCount:
-            rx = bbox.xMinimum() + bbox.width() * random.random()
-            ry = bbox.yMinimum() + bbox.height() * random.random()
-            pnt = QgsPoint(rx, ry)    
-            geom = QgsGeometry.fromPoint(pnt)
-            if geom.within(fGeom) and checkMinDistance(pnt, index, spacing, points):
-                f = QgsFeature(nPoints)
-                f.setAttributes([fid])
-                f.setGeometry(geom)
-                fts.append(f)
-                index.insertFeature(f)
-                points[nPoints] = pnt
-                nPoints += 1
-            nIterations += 1
-    provider.addFeatures(fts)
-    memory_lyr.updateFields()
-    memory_lyr.commitChanges()
-
-
-
-
-
-
-
-
-    def dist(x0, y0, x1, y1):
-        a = (x1 - x0)**2 + (y1 - y0)**2
-        b = math.sqrt(a)
-        return b
-
-
-
-# def checkMinDistance( point, index, distance, points):
-#     if distance == 0:
-#         return True
-#     neighbors = index.nearestNeighbor(point, 1)
-#     if len(neighbors) == 0:
-#         return True
-#     if neighbors[0] in points:
-#         np = points[neighbors[0]]
-#         if np.sqrDist(point) < (distance * distance):
-#             return False
-#     return True
+            print 'Diferenca media de elevacao: ', zAcum / len(listaHomologosZ)

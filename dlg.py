@@ -8,6 +8,7 @@
 
 from PyQt4 import QtCore, QtGui
 from qgis.gui import QgsMapLayerComboBox, QgsMapLayerProxyModel
+from PyQt4.QtCore import Qt
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -90,7 +91,7 @@ class Ui_Dialog(object):
         spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
         self.enter = QtGui.QDialogButtonBox(Dialog)
-        self.enter.setOrientation(QtCore.Qt.Horizontal)
+        self.enter.setOrientation(Qt.Horizontal)
         self.enter.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
         self.enter.setObjectName(_fromUtf8("enter"))
         self.verticalLayout.addWidget(self.enter)
@@ -112,8 +113,7 @@ class Ui_Dialog(object):
         self.escalaAvaliacao.setItemText(4, _translate("Dialog", "1:10.000", None))
         self.escalaAvaliacao.setItemText(5, _translate("Dialog", "1:2.000", None))
         self.escalaAvaliacao.setItemText(6, _translate("Dialog", "1:1.000", None))
-        self.label_5.setText(_translate("Dialog", "Raio", None))
+        self.label_5.setText(_translate("Dialog", "Raio de busca", None))
         self.label_6.setText(_translate("Dialog", "Parâmetros", None))
         self.xy.setText(_translate("Dialog", "X/Y", None))
         self.z.setText(_translate("Dialog", "Z", None))
-

@@ -99,21 +99,44 @@ class Interface(QDialog, GUI):
                 if Z:
                     listaHomologosZ[int(f1.id()), int(maisPerto.id())]  = f1.geometry().geometry().z() - maisPerto.geometry().geometry().z()
                 lista2.remove(maisPerto)
-
-        print 'Id\'s nao encontrados: ', listaNotFound
+        
+        #print 'Id\'s nao encontrados: ', listaNotFound
+        
         if XY or Z:
-            print 'Homologos: ', listaHomologosXY.keys()
+            #QMessageBox.information (self.iface.mainWindow() ,  u'Resultados: ' ,  'Homologos: ', listaHomologosXY.keys())
+            print 'Homologos: ', (listaHomologosXY.keys(),listaHomologosXY.values())
+            print 'DistanciaHomologados', listaHomologosXY.values()
 
         if XY:
             distAcum = 0
             for valorXY in listaHomologosXY.values():
                 distAcum += valorXY
 
+            resultado = str(distAcum / len(listaHomologosXY))
+            
+            #QMessageBox.about (self.iface.mainWindow() , u'Distancia media: ', resultado)
             print 'Distancia media: ', distAcum / len(listaHomologosXY)
 
         if Z:
             zAcum = 0
+            
             for valorZ in listaHomologosZ.values():
                 zAcum += valorZ
 
+            resultado = str(zAcum / len(listaHomologosZ))
+
+            #QMessageBox.information (self.iface.mainWindow() ,u'Diferenca media de elevacao:', resultado)
             print 'Diferenca media de elevacao: ', zAcum / len(listaHomologosZ)
+
+            
+            
+            
+            
+            
+            
+            
+            #_________________________________________________#
+            #                                                 #
+            #             Calculando a distância              #
+            #     distAB = sqrt((xA-xB)**2) + ((yA-yB)**2)    #  
+            #_________________________________________________#

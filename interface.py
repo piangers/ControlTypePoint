@@ -55,7 +55,7 @@ class Interface(QDialog, GUI):
         lista1 = [] # todas as features da layer1
         lista2 = [] # todas as features da layer2
 
-        listaHomologosXY = {} # dicionario yx.
+        listaHomologosXY = {} # dicionario yx.p
         listaHomologosZ = {} # dicionario z.    
        
         raio = self.spinBox.value()
@@ -81,40 +81,45 @@ class Interface(QDialog, GUI):
 
         tr1 = QgsCoordinateTransform(source1, dest)
         tr2 = QgsCoordinateTransform(source2, dest)
+ 
+####################################################################################################################################
 
-        # indice espacial
+        # indice espacial 
         spIndex = QgsSpatialIndex()
 
-
+        
         for f1 in layer1.getFeatures(): 
-            spIndex.insertFeature(f1)  
             lista1.append(f1)
+
        
         # pegando as features da layer2 e copiando pra lista. 
         for f2 in layer2.getFeatures():   
             lista2.append(f2)  
-            # QgsSpatialIndex.nearestNeighbor (QgsPoint point, int neighbors)
-            nearestid = spIndex.nearestNeighbor(f2, 1)    
 
-
-        # for f1 in lista1: 
-  
-        #     geom1 = QgsGeometry(f1.geometry()) 
-        #     geom1.transform(tr1)        
-        #     raioTeste = raio # raio teste recebe inicioalmente o raio definido.
-        #     maisPerto = None
-        #     encontrado =  False
-        #     pt = f2.geometry().asPoint()
-        #     nearestSpIndids = spIndex.nearestNeighbor(pt,2)    
-        #     for f2 in lista2: 
-        #         geom2 = QgsGeometry(f2.geometry())   
-        #         geom2.transform(tr2) 
-        #         if geom1.buffer(raioTeste,20).contains(geom2):
-        #             raioTeste = sqrt(geom1.asPoint().sqrDist(geom2.asPoint() ))
-        #             maisPerto = f2  
-        #             encontrado =  True
+                
+        
+        
+        for f1 in lista1: 
+            spIndex.insertFeature(f1)  # transforma features em indices espaciais
+            geom1 = QgsGeometry(f1.geometry()) 
+            geom1.transform(tr1)        
+            raioTeste = raio # raio teste recebe inicioalmente o raio definido.
+            maisPerto = None
+            encontrado =  False
+            pt = f2.geometry().asPoint()
+                
+            for f2 in lista2:
+                # QgsSpatialIndex.nearestNeighbor (QgsPoint point, int neighbors)
+                nearestid = spIndex.nearestNeighbor(f2, 1)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
+                print nearestid
+                geom2 = QgsGeometry(f2.geometry())   
+                geom2.transform(tr2) 
+                if geom1.buffer(raioTeste,20).contains(geom2):
+                    raioTeste = sqrt(geom1.asPoint().sqrDist(geom2.asPoint() ))
+                    maisPerto = f2  
+                    encontrado =  True
  
-
+  
             # apenas pra descobrir se não foi encontrado.
             if encontrado == False:
                 
@@ -138,13 +143,14 @@ class Interface(QDialog, GUI):
         print '\nDistancia entre pontos Homologados:\n',resultado
     
         if XY:
+            distAcum = 0
             for valorXY in listaHomologosXY.values():
                 distAcum += valorXY    
  
             resultado = float(distAcum / len(listaHomologosXY))
 
             print '\nDistancia media:\n', round(resultado,2)  
-  
+
         if Z:
             zAcum = 0     
             for valorZ in listaHomologosZ.values(): 
@@ -154,14 +160,13 @@ class Interface(QDialog, GUI):
             print '\nDiferenca media de elevacao: \n', round(resultado,3)
 
  
+       
 
 
-
-
-            #_________________________________________________#
-            #                                                 #
-            #               Calculo distância                 #
-            #     distAB = sqrt((xA-xB)**2) + ((yA-yB)**2)    #  
-            #_________________________________________________#
+        #     #_________________________________________________#
+        #     #                                                 #
+        #     #               Calculo distância                 #
+        #     #     distAB = sqrt((xA-xB)**2) + ((yA-yB)**2)    #  
+        #     #_________________________________________________#
 
             

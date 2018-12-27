@@ -53,11 +53,14 @@ class Interface(QDialog, GUI):
         listaHomologosXY = {} # dicionario yx.
         listaHomologosZ = {} # dicionario z.    
        
+        # Raio definido
         raio = self.spinBox.value()
 
+        # Layers selecionados
         layer1 = self.referenciaComboBox.currentLayer()
         layer2 = self.avaliacaoComboBox.currentLayer()
 
+        # Teste para identificar se esta setado.
         XY = False 
         Z = False
 
@@ -92,12 +95,12 @@ class Interface(QDialog, GUI):
             raioTeste = raio 
             neighbour = None
             encontrado =  False
-            pt = feat2.geometry().asPoint()
+            
                 
             for feat2 in lista2:
-                
+                pt = feat2.geometry().asPoint()
                 # # QgsSpatialIndex.nearestNeighbor (QgsPoint point, int neighbors)
-                nearestid = spIndex1.nearestNeighbor(pt , 1)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
+                nearestid = spIndex1.nearestNeighbor(pt, 1)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
                 request = QgsFeatureRequest().setFilterFid(nearestid)
                 #neighbour = feat2
                 
@@ -110,7 +113,7 @@ class Interface(QDialog, GUI):
                      neighbour = feat2  
                      encontrado =   True
                 
-               
+            
             # apenas pra descobrir se não foi encontrado.
             if encontrado == False: 
                 print u'\nHouve pontos não encontrados dentro do raio definido.'
@@ -122,7 +125,6 @@ class Interface(QDialog, GUI):
                     listaHomologosZ[int(feat1.id()), int(neighbour.id())]  = feat1.geometry().geometry().z() - neighbour.geometry().geometry().z()
                 lista2.remove(neighbour)     
 
-    
         if XY or Z:   
             print '\nHomologos: \n', listaHomologosXY.keys()
             resultado = listaHomologosXY.values()   
@@ -144,7 +146,6 @@ class Interface(QDialog, GUI):
             print '\nDiferenca media de elevacao: \n', round(resultado,3)
             
 
-    
 
         #     #_________________________________________________#
         #     #                                                 #
@@ -152,4 +153,41 @@ class Interface(QDialog, GUI):
         #     #     distAB = sqrt((xA-xB)**2) + ((yA-yB)**2)    #  
         #     #_________________________________________________#
 
-            
+# target_spatial_index = QgsSpatialIndex()
+# # populate the spatial index
+# for f in featB:
+#     target_spatial_index.insertFeature(f)
+
+
+# with edit(layerB):
+#     for feat in featA:
+
+#         # Skip if into deleted list
+#         if feat.id() not in del_feat:
+
+#             point1 = feat.geometry().asPoint()
+
+#             nearest_ids = target_spatial_index.nearestNeighbor(point1,2)
+
+#             high_id=0
+#             for id in nearest_ids:
+
+#                 outFeat = layerB.getFeatures(QgsFeatureRequest().setFilterFid(id)).next()
+
+#                 #skip himself
+#                 if outFeat.id() != feat.id():
+
+#                     # distance between points
+#                     point2 = outFeat.geometry().asPoint()
+#                     dist = sqrt(point1.sqrDist(point2))
+
+#                     high_id=outFeat.id()
+
+
+#                     if dist <= 15:
+#                         # remove from spatial index
+#                         target_spatial_index.deleteFeature(outFeat)
+
+#                         layerB.deleteFeatures([high_id])
+#                         # add to list of deleted
+#                         del_feat.append(high_id)

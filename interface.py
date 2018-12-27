@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsGeometry, QgsSpatialIndex
+from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsGeometry, QgsSpatialIndex, QgsPoint, QgsFeatureRequest, QgsFeature
 from qgis.gui import QgsMessageBar
 from PyQt4.QtGui import QDialog
 from dlg import Ui_Dialog as GUI
@@ -31,7 +31,7 @@ class Interface(QDialog, GUI):
 
         if self.referenciaComboBox.currentLayer() is None:  
             print 'Sem layer referencia definido.\n'
-        
+           
         elif self.avaliacaoComboBox.currentLayer() is None:
             print 'Sem layer de avaliacao definido.\n'
         
@@ -41,8 +41,6 @@ class Interface(QDialog, GUI):
             self.run()
             super(Interface, self).accept()
  
-
-
     def run(self):
 
         # Converter escala textual para numérica (denominador)
@@ -55,18 +53,16 @@ class Interface(QDialog, GUI):
         lista1 = [] # todas as features da layer1
         lista2 = [] # todas as features da layer2
 
-        listaHomologosXY = {} # dicionario yx.p
+        listaHomologosXY = {} # dicionario yx.
         listaHomologosZ = {} # dicionario z.    
        
         raio = self.spinBox.value()
 
-
         # layers
         layer1 = self.referenciaComboBox.currentLayer()
         layer2 = self.avaliacaoComboBox.currentLayer()
-       
 
-        XY = False
+        XY = False 
         Z = False
 
         if self.xy.isChecked():
@@ -81,51 +77,53 @@ class Interface(QDialog, GUI):
 
         tr1 = QgsCoordinateTransform(source1, dest)
         tr2 = QgsCoordinateTransform(source2, dest)
- 
-####################################################################################################################################
-
+###################################################################################################################################################################
+        
         # indice espacial 
-        spIndex = QgsSpatialIndex()
-
-        
+        spIndex1 = QgsSpatialIndex()
+        neighbour = QgsFeature()
+     
+        # for f1 in layer1.getFeatures(): 
+        #     lista1.append(f1)
+           
+        # # pegando as features da layer2 e copiando pra lista. 
+        # for f2 in layer2.getFeatures():   
+        #     lista2.append(f2) 
+            
+    
         for f1 in layer1.getFeatures(): 
-            lista1.append(f1)
 
-       
-        # pegando as features da layer2 e copiando pra lista. 
-        for f2 in layer2.getFeatures():   
-            lista2.append(f2)  
+            spIndex1.insertFeature(f1)  # transforma features em indices espaciais
 
-                
-        
-        
-        for f1 in lista1: 
-            spIndex.insertFeature(f1)  # transforma features em indices espaciais
             geom1 = QgsGeometry(f1.geometry()) 
             geom1.transform(tr1)        
             raioTeste = raio # raio teste recebe inicioalmente o raio definido.
             maisPerto = None
             encontrado =  False
-            pt = f2.geometry().asPoint()
+            
                 
-            for f2 in lista2:
-                # QgsSpatialIndex.nearestNeighbor (QgsPoint point, int neighbors)
-                nearestid = spIndex.nearestNeighbor(f2, 1)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
-                print nearestid
-                geom2 = QgsGeometry(f2.geometry())   
+            for f2 in layer2.getFeatures():
+                pt = f2.geometry().asPoint()
+                # # QgsSpatialIndex.nearestNeighbor (QgsPoint point, int neighbors)
+                nearestid = spIndex1.nearestNeighbor(pt , 1)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
+                request = QgsFeatureRequest().setFilterFid(nearestid)
+                neighbour = f2.getFeature(request).next()
+                
+                geom2 = QgsGeometry(neighbour.geometry())   
                 geom2.transform(tr2) 
-                if geom1.buffer(raioTeste,20).contains(geom2):
-                    raioTeste = sqrt(geom1.asPoint().sqrDist(geom2.asPoint() ))
-                    maisPerto = f2  
-                    encontrado =  True
- 
-  
+                distancia = sqrt(geom1.asPoint().sqrDist(geom2.asPoint() ))
+               
+               
+                if distancia < raioTeste:
+                    print 'achou'
+                else:
+                    print 'nao'
+
             # apenas pra descobrir se não foi encontrado.
-            if encontrado == False:
-                
+            if encontrado == False: 
                 print u'\nHouve pontos não encontrados dentro do raio definido.'
                 self.iface.messageBar().pushMessage(u'Houve pontos não encontrados dentro do raio definido.', level=QgsMessageBar.WARNING, duration=5)
-            
+
             else:
                 if XY:
                     listaHomologosXY[int(f1.id()), int(maisPerto.id())] = (raioTeste)
@@ -133,29 +131,26 @@ class Interface(QDialog, GUI):
                     listaHomologosZ[int(f1.id()), int(maisPerto.id())]  = f1.geometry().geometry().z() - maisPerto.geometry().geometry().z()
                 lista2.remove(maisPerto)     
 
-
-        if XY or Z: 
-            
+        if XY or Z:   
             print '\nHomologos: \n', listaHomologosXY.keys()
             self.iface.messageBar().pushMessage(u'\nHomologos: \n'+str(listaHomologosXY.keys()), level=QgsMessageBar.WARNING, duration=5)
-            resultado = listaHomologosXY.values()
+            resultado = listaHomologosXY.values()  
             
-        print '\nDistancia entre pontos Homologados:\n',resultado
-    
-        if XY:
+            print '\nDistancia entre pontos Homologados:\n',resultado
+            print pt
+            
+        if XY: 
             distAcum = 0
             for valorXY in listaHomologosXY.values():
                 distAcum += valorXY    
- 
-            resultado = float(distAcum / len(listaHomologosXY))
 
+            resultado = float(distAcum / len(listaHomologosXY))
             print '\nDistancia media:\n', round(resultado,2)  
 
         if Z:
             zAcum = 0     
             for valorZ in listaHomologosZ.values(): 
                 zAcum += valorZ
-
             resultado = float(zAcum / len(listaHomologosZ)) 
             print '\nDiferenca media de elevacao: \n', round(resultado,3)
 

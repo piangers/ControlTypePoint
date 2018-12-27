@@ -49,16 +49,12 @@ class Interface(QDialog, GUI):
         escalaAval = int(escalaAval)
         
         self.canvas.zoomScale(escalaAval)
-         
-        lista1 = [] # todas as features da layer1
-        lista2 = [] # todas as features da layer2
 
         listaHomologosXY = {} # dicionario yx.
         listaHomologosZ = {} # dicionario z.    
        
         raio = self.spinBox.value()
 
-        # layers
         layer1 = self.referenciaComboBox.currentLayer()
         layer2 = self.avaliacaoComboBox.currentLayer()
 
@@ -77,86 +73,78 @@ class Interface(QDialog, GUI):
 
         tr1 = QgsCoordinateTransform(source1, dest)
         tr2 = QgsCoordinateTransform(source2, dest)
-###################################################################################################################################################################
-        
+
+        lista1 = [feat1 for feat1 in layer1.getFeatures()]
+        lista2 = [feat2 for feat2 in layer2.getFeatures()]
+
         # indice espacial 
         spIndex1 = QgsSpatialIndex()
+
         neighbour = QgsFeature()
      
-        # for f1 in layer1.getFeatures(): 
-        #     lista1.append(f1)
-           
-        # # pegando as features da layer2 e copiando pra lista. 
-        # for f2 in layer2.getFeatures():   
-        #     lista2.append(f2) 
-            
-    
-        for f1 in layer1.getFeatures(): 
+        
+        for feat1 in lista1: 
 
-            spIndex1.insertFeature(f1)  # transforma features em indices espaciais
+            spIndex1.insertFeature(feat1)  # transforma features em indices espaciais
 
-            geom1 = QgsGeometry(f1.geometry()) 
+            geom1 = QgsGeometry(feat1.geometry()) 
             geom1.transform(tr1)        
-            raioTeste = raio # raio teste recebe inicioalmente o raio definido.
-            maisPerto = None
+            raioTeste = raio 
+            neighbour = None
             encontrado =  False
-            
+            pt = feat2.geometry().asPoint()
                 
-            for f2 in layer2.getFeatures():
-                pt = f2.geometry().asPoint()
+            for feat2 in lista2:
+                
                 # # QgsSpatialIndex.nearestNeighbor (QgsPoint point, int neighbors)
                 nearestid = spIndex1.nearestNeighbor(pt , 1)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
                 request = QgsFeatureRequest().setFilterFid(nearestid)
-                neighbour = f2.getFeature(request).next()
+                #neighbour = feat2
                 
-                geom2 = QgsGeometry(neighbour.geometry())   
+                geom2 = QgsGeometry(feat2.geometry()) 
+                 
                 geom2.transform(tr2) 
-                distancia = sqrt(geom1.asPoint().sqrDist(geom2.asPoint() ))
-               
-               
-                if distancia < raioTeste:
-                    print 'achou'
-                else:
-                    print 'nao'
 
+                if geom1.buffer (raioTeste, 20 ) .contains (geom2):
+                     raioTeste = sqrt (geom1.asPoint (). sqrDist (geom2.asPoint ()))
+                     neighbour = feat2  
+                     encontrado =   True
+                
+               
             # apenas pra descobrir se não foi encontrado.
             if encontrado == False: 
                 print u'\nHouve pontos não encontrados dentro do raio definido.'
-                self.iface.messageBar().pushMessage(u'Houve pontos não encontrados dentro do raio definido.', level=QgsMessageBar.WARNING, duration=5)
-
+                
             else:
                 if XY:
-                    listaHomologosXY[int(f1.id()), int(maisPerto.id())] = (raioTeste)
+                    listaHomologosXY[int(feat1.id()), int(neighbour.id())] = (raioTeste)
                 if Z:
-                    listaHomologosZ[int(f1.id()), int(maisPerto.id())]  = f1.geometry().geometry().z() - maisPerto.geometry().geometry().z()
-                lista2.remove(maisPerto)     
+                    listaHomologosZ[int(feat1.id()), int(neighbour.id())]  = feat1.geometry().geometry().z() - neighbour.geometry().geometry().z()
+                lista2.remove(neighbour)     
 
+    
         if XY or Z:   
             print '\nHomologos: \n', listaHomologosXY.keys()
-            self.iface.messageBar().pushMessage(u'\nHomologos: \n'+str(listaHomologosXY.keys()), level=QgsMessageBar.WARNING, duration=5)
-            resultado = listaHomologosXY.values()  
-            
+            resultado = listaHomologosXY.values()   
             print '\nDistancia entre pontos Homologados:\n',resultado
-            print pt
-            
+                     
         if XY: 
             distAcum = 0
             for valorXY in listaHomologosXY.values():
                 distAcum += valorXY    
 
-            resultado = float(distAcum / len(listaHomologosXY))
+            resultado = int(distAcum / len(listaHomologosXY))
             print '\nDistancia media:\n', round(resultado,2)  
-
+            
         if Z:
             zAcum = 0     
             for valorZ in listaHomologosZ.values(): 
                 zAcum += valorZ
-            resultado = float(zAcum / len(listaHomologosZ)) 
+            resultado = int(zAcum / len(listaHomologosZ)) 
             print '\nDiferenca media de elevacao: \n', round(resultado,3)
+            
 
- 
-       
-
+    
 
         #     #_________________________________________________#
         #     #                                                 #

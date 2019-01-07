@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsGeometry, QgsSpatialIndex, QgsPoint, QgsFeatureRequest, QgsFeature
 from qgis.gui import QgsMessageBar
-from PyQt4.QtGui import QDialog
+from PyQt4.QtGui import QDialog, QMessageBox
 from dlg import Ui_Dialog as GUI
 import math
 from math import sqrt
@@ -39,7 +39,7 @@ class Interface(QDialog, GUI):
              print 'Defina um eixo.\n'
         else:
             self.run()
-            super(Interface, self).accept()
+            #super(Interface, self).accept()
  
     def run(self):
 
@@ -89,29 +89,25 @@ class Interface(QDialog, GUI):
         for feat1 in lista1: 
 
             spIndex1.insertFeature(feat1)  # transforma features em indices espaciais
-
             geom1 = QgsGeometry(feat1.geometry()) 
             geom1.transform(tr1)        
             raioTeste = raio 
             neighbour = None
             encontrado =  False
-            
-                
+                        
             for feat2 in lista2:
+
                 pt = feat2.geometry().asPoint()
-                # # QgsSpatialIndex.nearestNeighbor (QgsPoint point, int neighbors)
-                nearestid = spIndex1.nearestNeighbor(pt, 1)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
+                nearestid = spIndex1.nearestNeighbor(pt, 2)[0] # realiza a analise do vizinho mais próximo, numero de vizinhos é definido no segundo argumento.
+                #print nearestid
                 request = QgsFeatureRequest().setFilterFid(nearestid)
-                #neighbour = feat2
-                
                 geom2 = QgsGeometry(feat2.geometry()) 
-                 
                 geom2.transform(tr2) 
 
                 if geom1.buffer (raioTeste, 20 ) .contains (geom2):
                      raioTeste = sqrt (geom1.asPoint (). sqrDist (geom2.asPoint ()))
                      neighbour = feat2  
-                     encontrado =   True
+                     encontrado = True
                 
             
             # apenas pra descobrir se não foi encontrado.
@@ -127,8 +123,10 @@ class Interface(QDialog, GUI):
 
         if XY or Z:   
             print '\nHomologos: \n', listaHomologosXY.keys()
+           # QMessageBox.about(self, "My message box", "Homologos:\n %s" % (listaHomologosXY.keys()))
             resultado = listaHomologosXY.values()   
             print '\nDistancia entre pontos Homologados:\n',resultado
+            #QMessageBox.about(self, "My message box", "Distancia entre pontos Homologados:\n %s" % (resultado))
                      
         if XY: 
             distAcum = 0
@@ -137,6 +135,7 @@ class Interface(QDialog, GUI):
 
             resultado = int(distAcum / len(listaHomologosXY))
             print '\nDistancia media:\n', round(resultado,2)  
+            #QMessageBox.about(self, "My message box", "Distancia media:\n %s" % (round(resultado,2)))
             
         if Z:
             zAcum = 0     
@@ -144,6 +143,9 @@ class Interface(QDialog, GUI):
                 zAcum += valorZ
             resultado = int(zAcum / len(listaHomologosZ)) 
             print '\nDiferenca media de elevacao: \n', round(resultado,3)
+            #QMessageBox.about(self, "My message box", "Diferenca media de elevacao:\n %s" % (round(resultado,3)))
+
+        
             
 
 
@@ -153,41 +155,4 @@ class Interface(QDialog, GUI):
         #     #     distAB = sqrt((xA-xB)**2) + ((yA-yB)**2)    #  
         #     #_________________________________________________#
 
-# target_spatial_index = QgsSpatialIndex()
-# # populate the spatial index
-# for f in featB:
-#     target_spatial_index.insertFeature(f)
 
-
-# with edit(layerB):
-#     for feat in featA:
-
-#         # Skip if into deleted list
-#         if feat.id() not in del_feat:
-
-#             point1 = feat.geometry().asPoint()
-
-#             nearest_ids = target_spatial_index.nearestNeighbor(point1,2)
-
-#             high_id=0
-#             for id in nearest_ids:
-
-#                 outFeat = layerB.getFeatures(QgsFeatureRequest().setFilterFid(id)).next()
-
-#                 #skip himself
-#                 if outFeat.id() != feat.id():
-
-#                     # distance between points
-#                     point2 = outFeat.geometry().asPoint()
-#                     dist = sqrt(point1.sqrDist(point2))
-
-#                     high_id=outFeat.id()
-
-
-#                     if dist <= 15:
-#                         # remove from spatial index
-#                         target_spatial_index.deleteFeature(outFeat)
-
-#                         layerB.deleteFeatures([high_id])
-#                         # add to list of deleted
-#                         del_feat.append(high_id)

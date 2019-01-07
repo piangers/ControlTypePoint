@@ -23,23 +23,19 @@ class Interface(QDialog, GUI):
 
     # Sinal para realizar a execução.
     def initSignals(self):
-        self.enter.accepted.connect(self.accept)
-    
+        self.enter.accepted.connect(self.acept)
+        
     
     # Necessario para o funcionamento da UI.
-    def accept(self):  
+    def acept(self):  
 
-        if self.referenciaComboBox.currentLayer() is None:  
-            print 'Sem layer referencia definido.\n'
-           
-        elif self.avaliacaoComboBox.currentLayer() is None:
-            print 'Sem layer de avaliacao definido.\n'
         
-        elif not self.xy.isChecked() and not self.z.isChecked():
-             print 'Defina um eixo.\n'
+        
+        if not self.xy.isChecked() and not self.z.isChecked():
+            print 'Defina um eixo.\n'
         else:
             self.run()
-            #super(Interface, self).accept()
+            super(Interface, self).accept()
  
     def run(self):
 
@@ -145,10 +141,7 @@ class Interface(QDialog, GUI):
             print '\nDiferenca media de elevacao: \n', round(resultado,3)
             #QMessageBox.about(self, "My message box", "Diferenca media de elevacao:\n %s" % (round(resultado,3)))
 
-        
             
-
-
         #     #_________________________________________________#
         #     #                                                 #
         #     #               Calculo distância                 #

@@ -24,13 +24,10 @@ class Interface(QDialog, GUI):
     # Sinal para realizar a execução.
     def initSignals(self):
         self.enter.accepted.connect(self.acept)
-        
-    
+           
     # Necessario para o funcionamento da UI.
     def acept(self):  
-
-        
-        
+    
         if not self.xy.isChecked() and not self.z.isChecked():
             print 'Defina um eixo.\n'
         else:
@@ -76,11 +73,9 @@ class Interface(QDialog, GUI):
         lista1 = [feat1 for feat1 in layer1.getFeatures()]
         lista2 = [feat2 for feat2 in layer2.getFeatures()]
         lista3 = []
-        # indice espacial 
+         
         spIndex1 = QgsSpatialIndex()
-
         neighbour = QgsFeature()
-     
         
         for feat1 in lista1: 
 
@@ -104,8 +99,7 @@ class Interface(QDialog, GUI):
                      raioTeste = sqrt (geom1.asPoint (). sqrDist (geom2.asPoint ()))
                      neighbour = feat2  
                      encontrado = True
-                
-            
+                  
             # apenas pra descobrir se não foi encontrado.
             if encontrado == False: 
                 #print u'\nHouve pontos não encontrados dentro do raio definido.'

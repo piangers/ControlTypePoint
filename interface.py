@@ -75,7 +75,7 @@ class Interface(QDialog, GUI):
 
         lista1 = [feat1 for feat1 in layer1.getFeatures()]
         lista2 = [feat2 for feat2 in layer2.getFeatures()]
-
+        lista3 = []
         # indice espacial 
         spIndex1 = QgsSpatialIndex()
 
@@ -108,8 +108,9 @@ class Interface(QDialog, GUI):
             
             # apenas pra descobrir se não foi encontrado.
             if encontrado == False: 
-                print u'\nHouve pontos não encontrados dentro do raio definido.'
-                
+                #print u'\nHouve pontos não encontrados dentro do raio definido.'
+                frase = 'Houve pontos nao encontrados dentro do raio definido.'
+                lista3.append(frase)
             else:
                 if XY:
                     listaHomologosXY[int(feat1.id()), int(neighbour.id())] = (raioTeste)
@@ -118,30 +119,36 @@ class Interface(QDialog, GUI):
                 lista2.remove(neighbour)     
 
         if XY or Z:   
-            print '\nHomologos: \n', listaHomologosXY.keys()
-           # QMessageBox.about(self, "My message box", "Homologos:\n %s" % (listaHomologosXY.keys()))
-            resultado = listaHomologosXY.values()   
-            print '\nDistancia entre pontos Homologados:\n',resultado
-            #QMessageBox.about(self, "My message box", "Distancia entre pontos Homologados:\n %s" % (resultado))
-                     
+            #print '\nHomologos: \n', listaHomologosXY.keys()
+            resultado2 = 'Distancia entre pontos Homologados: ',listaHomologosXY.values() 
+            resultado1 = 'Homologados: ',listaHomologosXY.keys()  
+            #print '\nDistancia entre pontos Homologados:\n',resultado2
+            
+            lista3.append(resultado1)
+            lista3.append(resultado2)      
         if XY: 
             distAcum = 0
             for valorXY in listaHomologosXY.values():
                 distAcum += valorXY    
 
             resultado = int(distAcum / len(listaHomologosXY))
-            print '\nDistancia media:\n', round(resultado,2)  
-            #QMessageBox.about(self, "My message box", "Distancia media:\n %s" % (round(resultado,2)))
-            
+            #print '\nDistancia media:\n', round(resultado,2)  
+            b = 'Distancia media: ',round(resultado,2)
+            lista3.append(b)
         if Z:
             zAcum = 0     
             for valorZ in listaHomologosZ.values(): 
                 zAcum += valorZ
             resultado = int(zAcum / len(listaHomologosZ)) 
-            print '\nDiferenca media de elevacao: \n', round(resultado,3)
-            #QMessageBox.about(self, "My message box", "Diferenca media de elevacao:\n %s" % (round(resultado,3)))
+            #print '\nDiferenca media de elevacao: \n', round(resultado,3)
 
-            
+            a = 'Diferenca media de elevacao: ', round(resultado,3)
+            lista3.append(a)
+        
+        for l in lista3:
+            print l
+        QMessageBox.about(self, "RESULTADO: ", "%s\n" % (lista3) )  
+
         #     #_________________________________________________#
         #     #                                                 #
         #     #               Calculo distância                 #

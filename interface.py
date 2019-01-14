@@ -123,7 +123,6 @@ class Interface(QDialog, GUI):
             resultado2 = 'Distancia entre pontos Homologados: ',listaHomologosXY.values() 
             resultado1 = 'Homologados: ',listaHomologosXY.keys()  
             #print '\nDistancia entre pontos Homologados:\n',resultado2
-            
             lista3.append(resultado1)
             lista3.append(resultado2)      
         if XY: 

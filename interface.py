@@ -115,7 +115,9 @@ class Interface(QDialog, GUI):
 
         if XY or Z:   
             #print '\nHomologos: \n', listaHomologosXY.keys()
-            resultado2 = "<span style='color:orange'>DISTANCIA ENTRE PONTOS: </span>",listaHomologosXY.values()
+            distAcum = 0
+             
+            resultado2 = "<span style='color:orange'>DISTANCIA ENTRE PONTOS: </span>",[ round(v, 2) for v in listaHomologosXY.values()]
             resultado1 = "<span style='color:orange'>PONTOS HOMOLOGADOS: </span>",listaHomologosXY.keys()
             #print '\nDistancia entre pontos Homologados:\n',resultado2
             lista3.append(resultado1)

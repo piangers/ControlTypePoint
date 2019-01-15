@@ -115,8 +115,8 @@ class Interface(QDialog, GUI):
 
         if XY or Z:   
             #print '\nHomologos: \n', listaHomologosXY.keys()
-            resultado2 = "<span style='color:green'>DISTANCIA ENTRE PONTOS: </span>",listaHomologosXY.values()
-            resultado1 = "<span style='color:green'>HOMOLOGADOS: </span>",listaHomologosXY.keys()
+            resultado2 = "<span style='color:orange'>DISTANCIA ENTRE PONTOS: </span>",listaHomologosXY.values()
+            resultado1 = "<span style='color:orange'>PONTOS HOMOLOGADOS: </span>",listaHomologosXY.keys()
             #print '\nDistancia entre pontos Homologados:\n',resultado2
             lista3.append(resultado1)
             lista3.append(resultado2)      
@@ -128,7 +128,7 @@ class Interface(QDialog, GUI):
 
             resultado = int(distAcum / len(listaHomologosXY))
             #print '\nDistancia media:\n', round(resultado,2)  
-            b = "<span style='color:green'>DISTANCIA MEDIA: </span>", round(resultado,2)
+            b = "<span style='color:orange'>DISTANCIA MEDIA: </span>", round(resultado,2)
             lista3.append(b)
         
         if Z:
@@ -138,13 +138,17 @@ class Interface(QDialog, GUI):
 
             resultado = int(zAcum / len(listaHomologosZ)) 
             #print '\nDiferenca media de elevacao: \n', round(resultado,3)
-            a = "<span style='color:green'>DISTANCIA MEDIA DE ELEVACAO: </span>", round(resultado,3)
+            a = "<span style='color:orange'>DISTANCIA MEDIA DE ELEVACAO: </span>", round(resultado,3)
             lista3.append(a)
-        
-        for l in lista3:
-            print l
-        
-        QMessageBox.about(self, "RESULTADO: ", "%s\n" % (lista3) )  
+
+        # Formatação para apresentar QmessageBox de forma bem distribuida.
+        message = u""
+        one_data = u"<p>{0}</p>"
+        two_data = u"<p>{0} {1}</p>"
+        for data in lista3:
+            message += one_data.format(data) if type(data) == str else two_data.format(data[0], data[1])
+  
+        QMessageBox.about(self, "RESULTADO: ", message )  
 
         #     #_________________________________________________#
         #     #                                                 #

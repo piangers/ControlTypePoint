@@ -20,7 +20,6 @@ class Interface(QDialog, GUI):
         
         self.initSignals() 
 
-
     # Sinal para realizar a execução.
     def initSignals(self):
         self.enter.accepted.connect(self.acept)
@@ -102,23 +101,26 @@ class Interface(QDialog, GUI):
                   
             # apenas pra descobrir se não foi encontrado.
             if encontrado == False: 
-                #print u'\nHouve pontos não encontrados dentro do raio definido.'
-                frase = 'Houve pontos nao encontrados dentro do raio definido.'
+                #print u'\nHouve pontos nao encontrados dentro do raio definido.'
+                frase = ("<span style='color:purple'>HOUVE PONTOS NAO ENCONTRADOS.</span>")
                 lista3.append(frase)
+            
             else:
                 if XY:
                     listaHomologosXY[int(feat1.id()), int(neighbour.id())] = (raioTeste)
+                
                 if Z:
                     listaHomologosZ[int(feat1.id()), int(neighbour.id())]  = feat1.geometry().geometry().z() - neighbour.geometry().geometry().z()
                 lista2.remove(neighbour)     
 
         if XY or Z:   
             #print '\nHomologos: \n', listaHomologosXY.keys()
-            resultado2 = 'Distancia entre pontos Homologados: ',listaHomologosXY.values() 
-            resultado1 = 'Homologados: ',listaHomologosXY.keys()  
+            resultado2 = "<span style='color:green'>DISTANCIA ENTRE PONTOS: </span>",listaHomologosXY.values()
+            resultado1 = "<span style='color:green'>HOMOLOGADOS: </span>",listaHomologosXY.keys()
             #print '\nDistancia entre pontos Homologados:\n',resultado2
             lista3.append(resultado1)
             lista3.append(resultado2)      
+        
         if XY: 
             distAcum = 0
             for valorXY in listaHomologosXY.values():
@@ -126,20 +128,22 @@ class Interface(QDialog, GUI):
 
             resultado = int(distAcum / len(listaHomologosXY))
             #print '\nDistancia media:\n', round(resultado,2)  
-            b = 'Distancia media: ',round(resultado,2)
+            b = "<span style='color:green'>DISTANCIA MEDIA: </span>", round(resultado,2)
             lista3.append(b)
+        
         if Z:
             zAcum = 0     
             for valorZ in listaHomologosZ.values(): 
                 zAcum += valorZ
+
             resultado = int(zAcum / len(listaHomologosZ)) 
             #print '\nDiferenca media de elevacao: \n', round(resultado,3)
-
-            a = 'Diferenca media de elevacao: ', round(resultado,3)
+            a = "<span style='color:green'>DISTANCIA MEDIA DE ELEVACAO: </span>", round(resultado,3)
             lista3.append(a)
         
         for l in lista3:
             print l
+        
         QMessageBox.about(self, "RESULTADO: ", "%s\n" % (lista3) )  
 
         #     #_________________________________________________#

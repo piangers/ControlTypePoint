@@ -118,7 +118,7 @@ class Interface(QDialog, GUI):
             distAcum = 0
              
             resultado2 = "<span style='color:orange'>DISTANCIA ENTRE PONTOS: </span>",[ round(v, 2) for v in listaHomologosXY.values()]
-            resultado1 = "<span style='color:orange'>PONTOS HOMOLOGADOS: </span>",listaHomologosXY.keys()
+            resultado1 = "<span style='color:orange'>PONTOS HOMOLOGOS: </span>",listaHomologosXY.keys()
             #print '\nDistancia entre pontos Homologados:\n',resultado2
             lista3.append(resultado1)
             lista3.append(resultado2)      
@@ -151,11 +151,5 @@ class Interface(QDialog, GUI):
             message += one_data.format(data) if type(data) == str else two_data.format(data[0], data[1])
   
         QMessageBox.about(self, "RESULTADO: ", message )  
-
-        #     #_________________________________________________#
-        #     #                                                 #
-        #     #               Calculo distância                 #
-        #     #     distAB = sqrt((xA-xB)**2) + ((yA-yB)**2)    #  
-        #     #_________________________________________________#
 
 
